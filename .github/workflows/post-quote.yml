@@ -2,12 +2,12 @@ name: Post Weekly Quote
 
 on:
   schedule:
-    # Runs every Monday at 9:00 AM UTC (adjust cron expression as needed)
+    # Runs every Friday at 9:00 AM EST (adjust cron expression as needed)
     # Format: minute hour day-of-month month day-of-week
-    # '0 9 * * 1' = Monday at 9:00 AM UTC
-    # To convert to your timezone, adjust the hour accordingly
-    # Example: '0 14 * * 1' = Monday at 2:00 PM UTC = Monday at 9:00 AM EST
-    - cron: '0 14 * * 5'  # Monday at 9:00 AM EST (14:00 UTC)
+    # GitHub Actions uses UTC time
+    # '0 14 * * 5' = Friday at 2:00 PM UTC = Friday at 9:00 AM EST
+    # Note: During EDT (daylight saving), this will run at 10:00 AM EDT
+    - cron: '0 14 * * 5'  # Friday at 9:00 AM EST (14:00 UTC)
   workflow_dispatch:  # Allows manual triggering from GitHub Actions tab
 
 jobs:
