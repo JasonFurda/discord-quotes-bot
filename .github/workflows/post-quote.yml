@@ -1,0 +1,36 @@
+name: Post Weekly Quote
+
+on:
+  schedule:
+    # Runs every Monday at 9:00 AM UTC (adjust cron expression as needed)
+    # Format: minute hour day-of-month month day-of-week
+    # '0 9 * * 1' = Monday at 9:00 AM UTC
+    # To convert to your timezone, adjust the hour accordingly
+    # Example: '0 14 * * 1' = Monday at 2:00 PM UTC = Monday at 9:00 AM EST
+    - cron: '0 14 * * 1'  # Monday at 9:00 AM EST (14:00 UTC)
+  workflow_dispatch:  # Allows manual triggering from GitHub Actions tab
+
+jobs:
+  post-quote:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Create .env file from secrets
+        run: |
+          echo "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" >> .env
+          echo "QUOTES_CHANNEL_ID=${{ secrets.QUOTES_CHANNEL_ID }}" >> .env
+          echo "GENERAL_CHANNEL_ID=${{ secrets.GENERAL_CHANNEL_ID }}" >> .env
+      
+      - name: Post weekly quote
+        run: node post-quote.js
