@@ -7,7 +7,7 @@ on:
     # '0 9 * * 1' = Monday at 9:00 AM UTC
     # To convert to your timezone, adjust the hour accordingly
     # Example: '0 14 * * 1' = Monday at 2:00 PM UTC = Monday at 9:00 AM EST
-    - cron: '0 14 * * 5'  # Monday at 9:00 AM EST (14:00 UTC)
+    - cron: "*/5 * * * *"  # Monday at 9:00 AM EST (14:00 UTC)
   workflow_dispatch:  # Allows manual triggering from GitHub Actions tab
 
 jobs:
