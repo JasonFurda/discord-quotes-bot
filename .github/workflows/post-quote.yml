@@ -7,7 +7,7 @@ on:
     # '0 9 * * 1' = Monday at 9:00 AM UTC
     # To convert to your timezone, adjust the hour accordingly
     # Example: '0 14 * * 1' = Monday at 2:00 PM UTC = Monday at 9:00 AM EST
-    - cron: '0 14 * * 1'  # Monday at 9:00 AM EST (14:00 UTC)
+    - cron: '0 14 * * 5'  # Monday at 9:00 AM EST (14:00 UTC)
   workflow_dispatch:  # Allows manual triggering from GitHub Actions tab
 
 jobs:
@@ -31,6 +31,22 @@ jobs:
           echo "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" >> .env
           echo "QUOTES_CHANNEL_ID=${{ secrets.QUOTES_CHANNEL_ID }}" >> .env
           echo "GENERAL_CHANNEL_ID=${{ secrets.GENERAL_CHANNEL_ID }}" >> .env
+      
+      - name: Verify .env file (without showing secrets)
+        run: |
+          if [ ! -f .env ]; then
+            echo "ERROR: .env file was not created!"
+            exit 1
+          fi
+          if [ ! -s .env ]; then
+            echo "ERROR: .env file is empty!"
+            exit 1
+          fi
+          echo ".env file created successfully"
+          echo "Checking for required variables..."
+          grep -q "DISCORD_TOKEN=" .env && echo "✓ DISCORD_TOKEN found" || echo "✗ DISCORD_TOKEN missing"
+          grep -q "QUOTES_CHANNEL_ID=" .env && echo "✓ QUOTES_CHANNEL_ID found" || echo "✗ QUOTES_CHANNEL_ID missing"
+          grep -q "GENERAL_CHANNEL_ID=" .env && echo "✓ GENERAL_CHANNEL_ID found" || echo "✗ GENERAL_CHANNEL_ID missing"
       
       - name: Post weekly quote
         run: node post-quote.js

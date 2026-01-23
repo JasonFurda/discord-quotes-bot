@@ -1,6 +1,12 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 require('dotenv').config();
 
+// Debug: Log environment variables (without showing token)
+console.log('Environment check:');
+console.log('DISCORD_TOKEN:', process.env.DISCORD_TOKEN ? 'SET (hidden)' : 'NOT SET');
+console.log('QUOTES_CHANNEL_ID:', process.env.QUOTES_CHANNEL_ID || 'NOT SET');
+console.log('GENERAL_CHANNEL_ID:', process.env.GENERAL_CHANNEL_ID || 'NOT SET');
+
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -38,6 +44,7 @@ async function postWeeklyQuote() {
         if (validMessages.length === 0) {
             console.log('No valid quotes found in the quotes channel');
             await generalChannel.send('No quotes available this week! 📝');
+            clearTimeout(timeoutId);
             await client.destroy();
             process.exit(0);
         }
@@ -52,18 +59,50 @@ async function postWeeklyQuote() {
         });
         
         console.log(`Posted weekly quote from ${randomQuote.author.tag}`);
+        clearTimeout(timeoutId);
         await client.destroy();
         process.exit(0);
     } catch (error) {
         console.error('Error posting weekly quote:', error);
-        await client.destroy();
+        console.error('Error stack:', error.stack);
+        if (client && !client.destroyed) {
+            await client.destroy();
+        }
         process.exit(1);
     }
 }
 
 client.once('ready', async () => {
     console.log(`Bot is ready! Logged in as ${client.user.tag}`);
+    clearTimeout(timeoutId); // Clear timeout since we connected successfully
     await postWeeklyQuote();
 });
 
-client.login(process.env.DISCORD_TOKEN);
+// Handle login errors
+client.on('error', (error) => {
+    console.error('Discord client error:', error);
+    process.exit(1);
+});
+
+// Set a timeout to prevent hanging
+let timeoutId = setTimeout(() => {
+    console.error('Timeout: Bot took too long to connect or post quote');
+    console.error('This usually means the bot failed to connect to Discord');
+    if (client && !client.destroyed) {
+        client.destroy();
+    }
+    process.exit(1);
+}, 60000); // 60 second timeout
+
+
+// Check if token exists before logging in
+if (!process.env.DISCORD_TOKEN) {
+    console.error('ERROR: DISCORD_TOKEN is not set in environment variables');
+    process.exit(1);
+}
+
+console.log('Attempting to login to Discord...');
+client.login(process.env.DISCORD_TOKEN).catch((error) => {
+    console.error('Failed to login:', error.message);
+    process.exit(1);
+});
