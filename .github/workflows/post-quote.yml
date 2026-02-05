@@ -2,34 +2,31 @@ name: Post Weekly Quote
 
 on:
   schedule:
-    # Testing configuration - runs every 5 minutes
-    # Format: minute hour day-of-month month day-of-week
-    # Note: Remember to change back to weekly schedule for production
-    - cron: "*/5 * * * *"  # Every 5 minutes (for testing)
-  workflow_dispatch:  # Allows manual triggering from GitHub Actions tab
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
 
 jobs:
   post-quote:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
+
       - name: Install dependencies
         run: npm install
-      
+
       - name: Create .env file from secrets
         run: |
           echo "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" >> .env
           echo "QUOTES_CHANNEL_ID=${{ secrets.QUOTES_CHANNEL_ID }}" >> .env
           echo "GENERAL_CHANNEL_ID=${{ secrets.GENERAL_CHANNEL_ID }}" >> .env
-      
+
       - name: Verify .env file (without showing secrets)
         run: |
           if [ ! -f .env ]; then
@@ -45,6 +42,6 @@ jobs:
           grep -q "DISCORD_TOKEN=" .env && echo "✓ DISCORD_TOKEN found" || echo "✗ DISCORD_TOKEN missing"
           grep -q "QUOTES_CHANNEL_ID=" .env && echo "✓ QUOTES_CHANNEL_ID found" || echo "✗ QUOTES_CHANNEL_ID missing"
           grep -q "GENERAL_CHANNEL_ID=" .env && echo "✓ GENERAL_CHANNEL_ID found" || echo "✗ GENERAL_CHANNEL_ID missing"
-      
+
       - name: Post weekly quote
         run: node post-quote.js
